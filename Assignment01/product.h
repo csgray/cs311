@@ -26,16 +26,18 @@ public:
 	// Post: 
 	Product()
 	{
-
+		_name = "";
+		_sales = 0;
 	}
 
 	// Constructor from data
 	// Sets product name and number of sales according to parameters.
 	// Pre: None.
 	// Post:
-	Product(std::string, int)
+	Product(std::string name, int sales)
 	{
-
+		_name = name;
+		_sales = sales;
 	}
 
 	// Copy constructor
@@ -58,25 +60,32 @@ public:
 	// operator++ (pre)
 	Product & operator++()
 	{
+		++_sales;
 		return *this;
 	}
 
 	// operator++ (post)
 	Product operator++(int)
 	{
-		return *this;
+		Product copy = *this;
+		++*this;
+		return copy;
 	}
 
 	// operator-- (pre)
 	Product & operator--()
 	{
+		if (_sales > 0)
+			--_sales;
 		return *this;
 	}
 
 	// operator-- (post)
 	Product operator--(int)
 	{
-		return *this;
+		Product copy = *this;
+		--*this;
+		return copy;
 	}
 
 // ***** Product: General public member functions *****

@@ -9,13 +9,14 @@
 #include "product.h" // For class Product
 #include <string>
 #include <ostream>
+#include <iostream>
 
 // getName
 // Pre:
 // Post:
 std::string Product::getName() const
 {
-	std::string name;
+	std::string name = _name;
 	return name;
 }
 
@@ -24,30 +25,31 @@ std::string Product::getName() const
 // Post:
 int Product::getSales() const
 {
-	int sales = 0;
+	int sales = _sales;
 	return sales;
 }
 
 // setName
 // Pre:
 // Post:
-void Product::setName(std::string)
+void Product::setName(std::string name)
 {
-
+	_name = name;
 }
 
 // setSales
 // Pre:
 // Post:
-void Product::setSales(int)
+void Product::setSales(int sales)
 {
-
+	if (sales >= 0)
+		_sales = sales;
 }
 
-//toString
+// toString
 std::string Product::toString() const
 {
-	std::string output;
+	std::string output = _name + " (sales: " + std::to_string(_sales) + ")";
 	return output;
 }
 
@@ -57,8 +59,7 @@ std::string Product::toString() const
 // Post:
 bool operator==(const Product & left, const Product & right)
 {
-	bool equal = false;
-	return equal;
+	return (left.getName() == right.getName() && left.getSales() == right.getSales());
 }
 
 // inequality (!=)
@@ -67,8 +68,7 @@ bool operator==(const Product & left, const Product & right)
 // Post:
 bool operator!=(const Product & left, const Product & right)
 {
-	bool inequal = false;
-	return inequal;
+	return !(left == right);
 }
 
 // operator<< (ostream,Product)
@@ -77,5 +77,6 @@ bool operator!=(const Product & left, const Product & right)
 // Post:
 std::ostream & operator<<(std::ostream & os, const Product & obj)
 {
+	os << obj.toString();
 	return os;
 }
