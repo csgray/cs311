@@ -12,8 +12,7 @@
 #include <iostream>
 
 // getName
-// Pre:
-// Post:
+// (See header for documentation.)
 std::string Product::getName() const
 {
 	std::string name = _name;
@@ -21,60 +20,53 @@ std::string Product::getName() const
 }
 
 // getSales
-// Pre:
-// Post:
+// (See header for documentation.)
 int Product::getSales() const
 {
 	int sales = _sales;
 	return sales;
 }
 
-// setName
-// Pre:
-// Post:
+// setName (string)
+// (See header for documentation.)
 void Product::setName(std::string name)
 {
 	_name = name;
 }
 
-// setSales
-// Pre:
-// Post:
+// setSales (int)
+// (See header for documentation.)
 void Product::setSales(int sales)
 {
+	// Checks that parameter int is not negative
 	if (sales >= 0)
 		_sales = sales;
 }
 
-// toString
+// toString (ostream,Product)
+// (See header for documentation.)
 std::string Product::toString() const
 {
 	std::string output = _name + " (sales: " + std::to_string(_sales) + ")";
 	return output;
 }
 
-// equality (==)
-//
-// Pre:
-// Post:
+// equality (==) (Product,Product)
+// (See header for documentation.)
 bool operator==(const Product & left, const Product & right)
 {
 	return (left.getName() == right.getName() && left.getSales() == right.getSales());
 }
 
-// inequality (!=)
-//
-// Pre:
-// Post:
+// inequality (!=) (Product,Product)
+// (See header for documentation.)
 bool operator!=(const Product & left, const Product & right)
 {
 	return !(left == right);
 }
 
 // operator<< (ostream,Product)
-//
-// Pre:
-// Post:
+// (See header for documentation.)
 std::ostream & operator<<(std::ostream & os, const Product & obj)
 {
 	os << obj.toString();

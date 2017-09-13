@@ -9,12 +9,12 @@
 #ifndef FILE_PRODUCT_H_INCLUDED
 #define FILE_PRODUCT_H_INCLUDED
 
-#include <string> // For std::string
+#include <string> // For std::string, std::to_string
 #include <ostream> // For std::ostream
 
 // class Product
 // Product name and number of sales
-// Invariants:
+// Invariants: _sales >= 0
 class Product {
 
 // ***** Product: Constructors, destructor, and assignment operators *****
@@ -23,7 +23,7 @@ public:
 	// Default constructor
 	// Sets the product name to an empty string and the number of items sold to zero.
 	// Pre: None.
-	// Post: 
+	// Post: Unnamed product with no sales.
 	Product()
 	{
 		_name = "";
@@ -32,12 +32,15 @@ public:
 
 	// Constructor from data
 	// Sets product name and number of sales according to parameters.
-	// Pre: None.
-	// Post:
+	// Pre: sales >= 0, otherwise _sales will be 0
+	// Post: Product named accordingly with set number of sales.
 	Product(std::string name, int sales)
 	{
 		_name = name;
-		_sales = sales;
+		if (sales >= 0)
+			_sales = sales;
+		else
+			_sales = 0;
 	}
 
 	// Copy constructor
@@ -58,6 +61,10 @@ public:
 // ***** Product: General public operators *****
 public:
 	// operator++ (pre)
+	// Pre: None.
+	// Post:
+	//		_sales increased by 1
+	//		Return is *this
 	Product & operator++()
 	{
 		++_sales;
@@ -65,6 +72,10 @@ public:
 	}
 
 	// operator++ (post)
+	// Pre: None.
+	// Post:
+	//		_sales increased by 1
+	//		Return is *this
 	Product operator++(int)
 	{
 		Product copy = *this;
@@ -73,6 +84,10 @@ public:
 	}
 
 	// operator-- (pre)
+	// Pre: Product in question has more than 0 sales, otherwise nothing happens.
+	// Post:
+	//		_sales decreased by 1
+	//		Return is *this.
 	Product & operator--()
 	{
 		if (_sales > 0)
@@ -81,6 +96,10 @@ public:
 	}
 
 	// operator-- (post)
+	// Pre: Product in question has more than 0 sales, otherwise nothing happens.
+	// Post:
+	//		_sales decreased by 1
+	//		Return is *this.
 	Product operator--(int)
 	{
 		Product copy = *this;
@@ -92,26 +111,31 @@ public:
 public:
 
 	// getName
-	// Pre:
-	// Post:
+	// Pre: None.
+	// Post: Returns product's name as a string.
 	std::string getName() const;
 	
 	// getSales
-	// Pre:
-	// Post:
+	// Pre: None.
+	// Post: Returns product's number of sales as an int.
 	int getSales() const;
 
 	// setName
-	// Pre:
-	// Post:
+	// Pre: None.
+	// Post: Set's the product's name to the string.
 	void setName(std::string);
 
 	// setSales
-	// Pre:
-	// Post:
+	// Pre: Parameter int be greater than 0.
+	// Post: Sets the product's number of sales to the int.
 	void setSales(int);
 
-	//toString
+	// toString
+	// Pre: None.
+	// Post:
+	//		Returns a string with the product's name and number of sales formatted as:
+	//		<name> (sales: <num>)
+	//		where <name> is the product's name and <num> is its number of sales
 	std::string toString() const;
 
 // ***** Product: Data members *****	
@@ -121,22 +145,31 @@ private:
 
 }; // End class Product
 
+// ***** class Product - Declarations of associated global operators *****
+
 // equality (==)
-//
-// Pre:
+// Checks whether two products' names and sales are both the same.
+// Pre: Two objects of class Product
 // Post:
+//		Returns a boolean.
+//		True if both names and sales are the same. False otherwise.
 bool operator==(const Product &, const Product &);
 
 // inequality (!=)
-//
-// Pre:
+// Checks whether two products' names and sales are not both the same.
+// Pre: Two objects of class Product.
 // Post:
+//		Returns a boolean.
+//		True if either name or sales is different. False if both names and sales are the same.
 bool operator!=(const Product &, const Product &);
 
 // operator<< (ostream,Product)
-//
-// Pre:
+// Prints given Product object as "<name> (sales: <num>)"
+// where <name> is the product's name and <num> is the number of products sold.
+// Pre: An object of class Product and valid ostream.
 // Post:
+//		Given Product object is printed to given stream as described.
+//		Return is given stream.
 std::ostream & operator<<(std::ostream &, const Product &);
 
 #endif //#ifndef FILE_PRODUCT_H_INCLUDED
