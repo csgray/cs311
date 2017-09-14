@@ -75,8 +75,8 @@ public:
 	// Pre: None.
 	// Post:
 	//		_sales increased by 1
-	//		Return is *this
-	Product operator++(int)
+	//		Return is a copy of old *this
+	Product operator++(int dummy)
 	{
 		Product copy = *this;
 		++*this;
@@ -99,8 +99,8 @@ public:
 	// Pre: Product in question has more than 0 sales, otherwise nothing happens.
 	// Post:
 	//		_sales decreased by 1
-	//		Return is *this.
-	Product operator--(int)
+	//		Return is a copy of old *this.
+	Product operator--(int dummy)
 	{
 		Product copy = *this;
 		--*this;
@@ -123,12 +123,12 @@ public:
 	// setName
 	// Pre: None.
 	// Post: Set's the product's name to the string.
-	void setName(std::string);
+	void setName(const std::string & );
 
 	// setSales
 	// Pre: Parameter int be greater than 0.
 	// Post: Sets the product's number of sales to the int.
-	void setSales(int);
+	void setSales(const int &);
 
 	// toString
 	// Pre: None.

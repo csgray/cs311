@@ -29,14 +29,14 @@ int Product::getSales() const
 
 // setName (string)
 // (See header for documentation.)
-void Product::setName(std::string name)
+void Product::setName(const std::string & name )
 {
 	_name = name;
 }
 
 // setSales (int)
 // (See header for documentation.)
-void Product::setSales(int sales)
+void Product::setSales(const int & sales)
 {
 	// Checks that parameter int is not negative
 	if (sales >= 0)
@@ -55,7 +55,8 @@ std::string Product::toString() const
 // (See header for documentation.)
 bool operator==(const Product & left, const Product & right)
 {
-	return (left.getName() == right.getName() && left.getSales() == right.getSales());
+	return (left.getName() == right.getName() &&
+			left.getSales() == right.getSales());
 }
 
 // inequality (!=) (Product,Product)
