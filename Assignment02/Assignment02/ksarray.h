@@ -4,7 +4,7 @@
 
 // For CS 311 Fall 2017
 // Header for template KSArray
-// A "kinda smart" array that knows its size and has copy operations
+// A "kinda smart" array
 
 #ifndef FILE_KSARRAY_H_INCLUDED
 #define FILE_KSARRAY_H_INCLUDED
@@ -12,8 +12,9 @@
 #include <algorithm> // For std::lexicographical_compare and std::swap
 
 // template KSArray
-// Desc
-// Invariants
+// Array of ValType with size, Big Five, comparison operators, bracket operator, begin, end
+// Invariants: _size >= 0
+// Requirements on Types: ValType must have operator!= and operator<
 template <typename ValType>
 class KSArray {
 
@@ -22,12 +23,13 @@ public:
 
 	// Default constructor
 	// Pre: None
-	// Post
-	KSArray() : _size(10), _array(new ValType[_size]) {}
+	// Post: KSArray with 10 items of type ValType
+	KSArray() : _size(10), _array(new value_type[_size]) {}
 
 	// 1-parameter constructor
 	// Pre: A non-negative integer giving the number of items in the array
-	KSArray(int number) : _size(number), _array(new ValType[_size]) {}
+	// Post: KSArray with specificed number of items of type ValType
+	KSArray(int number) : _size(number), _array(new value_type[_size]) {}
 
 	// Destructor
 	~KSArray()
@@ -36,13 +38,19 @@ public:
 	}
 
 	// Copy constructor
-	KSArray(const KSArray & other) : _size(other._size), _array(new ValType[_size])
+	// Pre: Valid KSArray object
+	// Post: Another KSArray object with same _size and _array as the first
+	KSArray(const KSArray & other) : _size(other.size()), _array(new value_type[size()])
 	{
-		for (auto i = 0; i != _size; ++i)
+		for (auto i = 0; i != size(); ++i)
 			_array[i] = other._array[i];
 	}
 
 	// Move constructor
+	// Pre: Valid KSArray object
+	// Post:
+	//		New KSArray object with same _size and _array as the first
+	//		Old KSArray object's size set to 0 and _array set to NULL
 	KSArray(KSArray && other) noexcept : _size(other._size), _array(other._array)
 	{
 		other._size = 0;
@@ -50,6 +58,10 @@ public:
 	}
 
 	// Copy assignment operator
+	// Pre: Valid KSArray object
+	// Post:
+	//		Return is a KSArray with the same _size and _array same as the other KSArray
+	//		Other KSArray is unchanged
 	KSArray & operator=(const KSArray & other)
 	{
 		KSArray copy(other);
@@ -58,6 +70,10 @@ public:
 	}
 
 	// Move assignment operator
+	// Pre: Valid KSArray object
+	// Post:
+	//		Return is a KSArray with the _size and _array of the other KSArray
+	//		Other KSArray now has this KSArray's old values
 	KSArray & operator=(KSArray && other) noexcept
 	{
 		mswap(other);
@@ -71,11 +87,16 @@ public:
 
 // ***** KSArray: Data members *****
 private:
-	size_type _size;
-	value_type * _array;
+	size_type _size; // Number of items in the array
+	value_type * _array; // Pointer to first item in the array
 
 // ***** KSArray: Private functions ****
 private:
+	// mswap
+	// Pre: Two valid KSArray objects
+	// Post:
+	//		The _size and _array of the first KSArray are those of the second
+	//		The _size and _array of the second KSArray are those of the first
 	void mswap(KSArray & other) noexcept
 	{
 		std::swap(_size, other._size);
@@ -87,12 +108,15 @@ public:
 
 	// operator[]
 	// Pre: An integer from 0 to size-1 where size is the number of items in the array
-	// Post: Returns a reference to the proper item
+	// Post: Returns a modifiable reference to the proper item
 	value_type & operator[](const size_type i)
 	{
 		return _array[i];
 	}
 
+	// operator[] const
+	// Pre: An integer from 0 to size-1 where size is the number of items in the array
+	// Post: Returns a not-modifiable reference to the proper item
 	const value_type & operator[](const size_type i) const
 	{
 		return _array[i];
@@ -117,6 +141,11 @@ public:
 		return _array;
 	}
 
+	// begin const
+	// Pre: None
+	// Post:
+	//		Returns the address of item 0 in the array
+	//		Does not allow modification of the item
 	const value_type * begin() const
 	{
 		return _array;
@@ -125,11 +154,17 @@ public:
 	// end
 	// Pre: None
 	// Post: Returns the address of the item one-past the end of the array
+	
 	value_type * end()
 	{
 		return _array + _size;
 	}
 
+	// end const
+	// Pre: None
+	// Post:
+	//		Returns the address of the item one-past the end of the array
+	//		Does not allow modification of the item
 	const value_type * end() const
 	{
 		return _array + _size;
@@ -145,8 +180,9 @@ public:
 // Post:
 //		Returns a boolean.
 //		True if both size and corresponding items are equal. False otherwise.
-template <typename value_type>
-bool operator==(const KSArray<value_type> & lhs, const KSArray<value_type> & rhs)
+// Requirements on Types: ValType must have operator !=
+template <typename ValType>
+bool operator==(const KSArray<ValType> & lhs, const KSArray<ValType> & rhs)
 {
 	if (lhs.size() != rhs.size())
 		return false;
@@ -159,19 +195,28 @@ bool operator==(const KSArray<value_type> & lhs, const KSArray<value_type> & rhs
 }
 
 // inequality (!=)
-// Checks whether two KSarrays with the same value_type do not have the same
+// Checks whether two KSArrays with the same value_type do not have the same
 // size and/or not all corresponding items are equal
 // Pre: Two objects of class KSArray with the same value_type
 // Post:
 //		Returns a boolean.
-//		True if either size or corresponding items are different. False otherwise.
-template <typename value_type>
-bool operator!=(const KSArray<value_type> & lhs, const KSArray<value_type> & rhs)
+//		True if either size or corresponding items are different
+//		False otherwise
+// Requirements on Types: ValType must have operator!=
+template <typename ValType>
+bool operator!=(const KSArray<ValType> & lhs, const KSArray<ValType> & rhs)
 {
 	return !(lhs == rhs);
 }
 
 // less than (<)
+// Checks if the first KSArray has a lower lexicographical value than the second
+// Pre: Two objects of class KSArray with the same value_type
+// Post:
+//		Returns a boolean
+//		True if the first KSArray has a lower lexicographical value than the second
+//		False otherwise
+// Requirements on Types: ValType must have operator<
 template <typename ValType>
 bool operator<(const KSArray<ValType> & lhs, const KSArray<ValType> & rhs)
 {
@@ -179,6 +224,14 @@ bool operator<(const KSArray<ValType> & lhs, const KSArray<ValType> & rhs)
 }
 
 // less than or equal (<=)
+// Checks if the first KSArray has a lower or equal lexicographical value as compared to the second
+// Pre: Two objects of class KSArray with the same value_type
+// Post:
+//		Returns a boolean
+//		True if the first KSArray has a lower lexicographical value than the second
+//		True if the two KSArrays are equal
+//		False otherwise
+// Requirements on Types: ValType must have operator<
 template <typename ValType>
 bool operator<=(const KSArray<ValType> & lhs, const KSArray<ValType> & rhs)
 {
@@ -186,6 +239,13 @@ bool operator<=(const KSArray<ValType> & lhs, const KSArray<ValType> & rhs)
 }
 
 // greater than (>)
+// Checks if the first KSArray has a higher lexicographical value than the second
+// Pre: Two objects of class KSArray with the same value_type
+// Post:
+//		Returns a boolean
+//		True if the first KSArray has a higher lexicographical value than the second
+//		False otherwise
+// Requirements on Types: ValType must have operator<
 template <typename ValType>
 bool operator>(const KSArray<ValType> & lhs, const KSArray<ValType> & rhs)
 {
@@ -193,6 +253,14 @@ bool operator>(const KSArray<ValType> & lhs, const KSArray<ValType> & rhs)
 }
 
 // greater than or equal (>=)
+// Checks if the first KSArray has a higher or equal lexicographical value as compared to the second
+// Pre: Two objects of class KSArray with the same value_type
+// Post:
+//		Returns a boolean
+//		True if the first KSArray has a higher lexicographical value than the second
+//		True if the two KSArrays are equal
+//		False otherwise
+// Requirements on Types: ValType must have operator<
 template <typename ValType>
 bool operator>=(const KSArray<ValType> & lhs, const KSArray<ValType> & rhs)
 {
