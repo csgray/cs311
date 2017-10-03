@@ -12,7 +12,9 @@
 using std::size_t;
 #include <functional>
 using std::function;
-#include <stdexcept> //for std::out_of_range
+#include <stdexcept> // for std::out_of_range
+#include <algorithm> // for std::find
+#include <iterator>  // for std::next
 
 
 // **************************************************************** // *
@@ -93,9 +95,16 @@ template <typename RAIter>
 size_t uniqueCount(RAIter first,
                    RAIter last)
 {
-    return size_t(42);  // Dummy return, so that it compiles
-                        // Elminate this return statement!
-    // TODO: Write this!!!
+	size_t uniques = 0;
+
+	while (first != last)
+	{
+		if (std::find(std::next(first), last, *first) == last)
+			++uniques;
+		++first;
+	}
+
+	return uniques;
 }
 
 
