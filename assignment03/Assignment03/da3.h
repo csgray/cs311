@@ -12,6 +12,7 @@
 using std::size_t;
 #include <functional>
 using std::function;
+#include <stdexcept> //for std::out_of_range
 
 
 // **************************************************************** // *
@@ -67,9 +68,18 @@ template <typename ValueType>
 ValueType lookUp(const LLNode<ValueType> * head,
                  size_t index)
 {
-    return ValueType();  // Dummy return, so that it compiles
-                         // Elminate this return statement!
-    // TODO: Write this!!!
+	while (true)
+	{
+		if (head == nullptr)
+			throw std::out_of_range("Index out of range.");
+
+		if (index == 0)
+			return head->_data;
+
+		head = head->_next;
+		--index;
+	}
+
 }
 
 
