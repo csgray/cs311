@@ -1,6 +1,6 @@
 // da3.cpp
 // Corey S. Gray
-// 27 Sep 2017
+// 03 Oct 2017
 //
 // For CS 311 Fall 2017
 // Source for Assignment 3 Functions
@@ -9,7 +9,8 @@
 #include <functional>
 using std::function;
 
-
+// callBetween
+// Documentation in header file
 void callBetween(const function<void()> & start,
                  const function<void()> & middle,
                  const function<void()> & finish)
@@ -32,7 +33,8 @@ void callBetween(const function<void()> & start,
 	finish();
 }
 
-
+// gcd
+// Documentation in header file
 int gcd(int a,
         int b)
 {

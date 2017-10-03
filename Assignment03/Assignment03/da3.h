@@ -1,6 +1,6 @@
 // da3.h 
 // Corey S. Gray
-// 27 Sep 2017
+// 03 Oct 2017
 //
 // For CS 311 Fall 2017
 // Header for Assignment 3 Functions
@@ -12,9 +12,9 @@
 using std::size_t;
 #include <functional>
 using std::function;
-#include <stdexcept> // for std::out_of_range
-#include <algorithm> // for std::find
-#include <iterator>  // for std::next
+#include <stdexcept> // std::out_of_range
+#include <algorithm> // std::find
+#include <iterator>  // std::next and std::advance
 
 
 // **************************************************************** // *
@@ -65,7 +65,17 @@ struct LLNode {                                                     // *
 // Do not alter the lines above                                     // *
 // **************************************************************** // *
 
-
+// lookUp
+// Searches a linked list for node corresponding to index and returns its _data.
+// Preconditions:
+//		A valid LLNode object with _next and _data members.
+//		index is a nonnegative number.
+// Postconditions:
+//		Returns _data for the LLNode corresponding to index.
+// Requirements on Types:
+//		ValueType must have a copy ctor and a dctor.
+// Exceptions:
+//		lookUp throws std::out_of_range if index is larger than the list's size.
 template <typename ValueType>
 ValueType lookUp(const LLNode<ValueType> * head,
                  size_t index)
@@ -84,13 +94,30 @@ ValueType lookUp(const LLNode<ValueType> * head,
 
 }
 
-
-// Implementation in source file
+// callBetween
+// Calls three function objects in order.
+// Preconditions:
+//		Valid function objects to be called as start(), middle(), and finish().
+//		finish() may not throw.
+// Postconditions:
+//		Functions are called in order.
+// Exceptions:
+//		callBetween catches and rethrows any errors that start() or middle() throws.
+//		if start() throws then middle() and finish() will not be called.
+// Implementation in source file.
 void callBetween(const function<void()> & start,
                  const function<void()> & middle,
                  const function<void()> & finish);
 
-
+// uniqueCount
+// Searches a specified range and counts the total number of unique values. 
+// Preconditions:
+//		Two iterators specifying a range of values.
+//		first cannot be after last in the range.
+// Postconditions:
+//		Returns the number of unique values in the given range.
+// Restrictions on Types:
+//		RAIter must have operator==
 template <typename RAIter>
 size_t uniqueCount(RAIter first,
                    RAIter last)
@@ -101,14 +128,21 @@ size_t uniqueCount(RAIter first,
 	{
 		if (std::find(std::next(first), last, *first) == last)
 			++uniques;
-		++first;
+		std::advance(first);
 	}
 
 	return uniques;
 }
 
-
-// Implementation in source file
+// gcd
+// Recurses.
+// Finds the Greater Common Denominator of two integers.
+// Preconditions:
+//		Two nonnegative integers.
+//		Only one of the integers may be zero.
+// Postconditions:
+//		Returns the Greatest Common Denominator as an integer.
+// Implementation in source file.
 int gcd(int a,
         int b);
 
