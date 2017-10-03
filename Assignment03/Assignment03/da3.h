@@ -128,7 +128,7 @@ size_t uniqueCount(RAIter first,
 	{
 		if (std::find(std::next(first), last, *first) == last)
 			++uniques;
-		std::advance(first);
+		std::advance(first, 1);
 	}
 
 	return uniques;
