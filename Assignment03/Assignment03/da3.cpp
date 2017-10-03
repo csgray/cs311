@@ -36,8 +36,12 @@ void callBetween(const function<void()> & start,
 int gcd(int a,
         int b)
 {
-    return 42;  // Dummy return, so that it compiles
-                // Eliminate this return statement!
-    // TODO: Write this!!!
+	if (a == 0)
+		return b;
+
+	if (a > b)
+		gcd(b, a);
+
+	gcd(b % a, a);
 }
 
