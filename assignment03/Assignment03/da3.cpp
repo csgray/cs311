@@ -14,7 +14,22 @@ void callBetween(const function<void()> & start,
                  const function<void()> & middle,
                  const function<void()> & finish)
 {
-    // TODO: Write this!!!
+	try {
+		start();
+	}
+	catch (...) {
+		throw; // middle() and finish() are not called if start() throws
+	};
+
+	try {
+		middle();
+	}
+	catch (...) {
+		finish(); // finish() MUST be called after middle() no matter what
+		throw;
+	};
+
+	finish();
 }
 
 
