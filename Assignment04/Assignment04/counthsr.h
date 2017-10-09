@@ -15,7 +15,7 @@ int countHSR(int dim_x, int dim_y,			// board dimensions
 			 int start_x, int start_y,		// start square coordinates
 			 int finish_x, int finish_y);	// finish square coordinates
 
-int countHSR_recurse(std::vector<int> boardArray,
+int countHSR_recurse(std::vector<int> & boardArray,
 					 int dim_x, int dim_y,
 					 int finish_x, int finish_y,
 					 int pos_x, int pos_y,
