@@ -9,8 +9,8 @@
 #ifndef FILE_TSSARRAY_H_INCLUDED
 #define FILE_TSSARRAY_H_INCLUDED
 
-#include <cstddef> // For std::size_t
-#include <algorithm> // For std::max
+#include <cstddef>	 // For std::size_t
+#include <algorithm> // For std::copy, std::max, std::swap
 
 // ****************************************************************************
 // class TSSArray - Class Definition
@@ -38,7 +38,7 @@ public:
 // ***** TSSArray: Internal-use constants *****
 private:
 	// Capacity of default-constructed object
-	static const size_type DEFAULT_CAP;
+	static const size_type DEFAULT_CAP = 10;
 
 // ***** TSSArray: Constructors, Destructors, and Assignment Operators *****
 public:
@@ -53,11 +53,32 @@ public:
 
 	// Copy constructor
 	// Strong Guarantee
-	TSSArray(const TSSArray & other);
+	TSSArray(const TSSArray & other)
+		:_capacity(other._capacity),
+		 _size(other._size),
+		 _data(new value_type[_capacity])
+	{
+		try
+		{
+			std::copy(other.begin(), other.end(), begin());
+		}
+		catch (...)
+		{
+			this->~TSSArray();
+			throw;
+		}
+	}
 
 	// Move constructor
 	// No-Throw Guarantee
-	TSSArray(TSSArray && other) noexcept;
+	TSSArray(TSSArray && other) noexcept
+		:_capacity(other._capacity),
+		 _size(other._size),
+		 _data(other._data)
+	{
+		other._size = 0;
+		other._data = NULL;
+	}
 
 	// Destructor
 	// No-Throw Guarantee
@@ -67,11 +88,20 @@ public:
 	}
 
 	// Copy assignment operator
-	TSSArray & operator=(const TSSArray & rhs);
+	TSSArray & operator=(const TSSArray & rhs)
+	{
+		TSSArray copyobject(rhs);
+		swap(copyobject);
+		return *this;
+	}
 
 	// Move assignment operator
 	// No-Throw Guarantee
-	TSSArray & operator=(TSSArray && rhs) noexcept;
+	TSSArray & operator=(TSSArray && rhs) noexcept
+	{
+		swap(rhs);
+		return *this;
+	}
 
 // ***** TSSArray: General Public Operators *****
 public:
@@ -98,21 +128,37 @@ public:
 	}
 
 	// empty
-	// No-Throe Guarantee
+	// No-Throw Guarantee
 	bool empty() const
 	{
 		return size() == size_type(0);
 	}
 
 	// resize
-	void resize(size_type newsize);
+	void resize(size_type newsize)
+	{
+		if (_capacity <= newsize)
+		{
+			value_type * temp = new value_type[2 * newsize];
+			std::copy(begin(), end(), temp);
+			delete[] _data;
+			_data = temp;
+		}
+		_size = newsize;
+	}
 
 	// insert
 	iterator insert(iterator pos,
-					const value_type & item);
+					const value_type & item)
+	{
+		return pos;
+	}
 
 	// erase
-	iterator erase(iterator pos);
+	iterator erase(iterator pos)
+	{
+		return pos - 1;
+	}
 
 	// begin - non-const & const
 	// No-Throw Guarantee
@@ -154,7 +200,12 @@ public:
 
 	// swap
 	// No-Throw Guarantee
-	void swap(TSSArray & other) noexcept;
+	void swap(TSSArray & other) noexcept
+	{
+		std::swap(_capacity, other._capacity);
+		std::swap(_size, other._size);
+		std::swap(_data, other._data);
+	}
 
 // ***** TSSArray: Data Members *****
 private:
