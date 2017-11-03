@@ -20,11 +20,16 @@
 // Templated Stunningly Smart Array of ValType.
 // Resizable, copyable, movable, and exception-safe.
 // Invariants:
+//		0 <= size <= _capacity
+//		_data points to an array of ValType, owned by *this, holding _capacity ValType
+//		Exception: _data may be NULL if _capacity == 0 
+// Requirements on Types: None
 template <typename ValType>
 class TSSArray {
 
 // ***** TSSArray: Types *****
 public:
+
 	// value_type: type of data tiems
 	using value_type = ValType;
 	
@@ -37,13 +42,16 @@ public:
 
 // ***** TSSArray: Internal-use constants *****
 private:
+	
 	// Capacity of default-constructed object
-	static const size_type DEFAULT_CAP = 10;
+	static const size_type DEFAULT_CAP = 8;
 
 // ***** TSSArray: Constructors, Destructors, and Assignment Operators *****
 public:
 
 	// Default constructor and constructor from size
+	// Pre: size >= 0
+	// Exception neutral, does not throw any additional exceptions
 	// Strong Guarantee
 	explicit TSSArray(size_type size = size_type(0))
 		:_capacity(std::max(size, DEFAULT_CAP)), // _capacity must be declared before _data
@@ -52,6 +60,8 @@ public:
 	{}
 
 	// Copy constructor
+	// Pre: A valid TSSArray object
+	// Exception neutral, does not throw any additional exceptions
 	// Strong Guarantee
 	TSSArray(const TSSArray & other)
 		:_capacity(other._capacity),
@@ -70,6 +80,7 @@ public:
 	}
 
 	// Move constructor
+	// Pre: A valid TSSArray object
 	// No-Throw Guarantee
 	TSSArray(TSSArray && other) noexcept
 		:_capacity(other._capacity),
@@ -88,6 +99,9 @@ public:
 	}
 
 	// Copy assignment operator
+	// Pre: A valid TSSArray objects
+	// Exception neutral, does not throw any additional exceptions
+	// Strong Guarantee
 	TSSArray & operator=(const TSSArray & rhs)
 	{
 		TSSArray copyobject(rhs);
@@ -96,6 +110,7 @@ public:
 	}
 
 	// Move assignment operator
+	// Pre: Valid TSSAray object
 	// No-Throw Guarantee
 	TSSArray & operator=(TSSArray && rhs) noexcept
 	{
@@ -106,7 +121,8 @@ public:
 // ***** TSSArray: General Public Operators *****
 public:
 
-	// Operator[] - non-const and const
+	// operator[] - non-const and const
+	// Pre: 0 <= index <= _size - 1
 	// No-Throw Guarantee
 	value_type & operator[](size_type index)
 	{
@@ -135,6 +151,9 @@ public:
 	}
 
 	// resize
+	// Pre:  newsize >= 0
+	// Exception neutral, does not throw any additional exceptions
+	// Strong Guarantee
 	void resize(size_type newsize)
 	{
 		if (newsize > _capacity)
@@ -157,6 +176,9 @@ public:
 	}
 
 	// insert
+	// Pre: begin() <= pos <= end()
+	// Exception neutral, does not throw any additional exceptions
+	// Strong Guarantee
 	iterator insert(iterator pos,
 					const value_type & item)
 	{
@@ -164,11 +186,22 @@ public:
 		resize(_size + 1);
 		_data[_size - 1] = item;
 		iterator newpos = begin() + index;
-		std::rotate(newpos, begin() + _size - 1, end());
+		try
+		{
+			std::rotate(newpos, begin() + _size - 1, end());
+		}
+		catch (...)
+		{
+			resize(_size - 1);
+			throw;
+		}
 		return newpos;
 	}
 
 	// erase
+	// Pre: begin() <= pos <= end()
+	// Exception neutral, does not throw any additional exceptions
+	// Strong Guarantee
 	iterator erase(iterator pos)
 	{
 		std::rotate(pos, pos + 1, end());
@@ -200,6 +233,8 @@ public:
 
 	// push_back
 	// InsertEnd operation.
+	// Exception neutral, does not throw any additional exceptions
+	// Strong Guarantee
 	void push_back(const value_type & item)
 	{
 		insert(end(), item);
@@ -207,14 +242,16 @@ public:
 
 	// pop_back
 	// RemoveEnd operation.
-	// Precondition:
-	//		_size > 0.
+	// Pre: _size > 0.
+	// Exception neutral, does not throw any additional exceptions
+	// Strong Guarantee
 	void pop_back()
 	{
 		erase(end() - 1);
 	}
 
 	// swap
+	// Pre: Two valid TSSArray objects
 	// No-Throw Guarantee
 	void swap(TSSArray & other) noexcept
 	{
