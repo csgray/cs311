@@ -10,7 +10,7 @@
 #define FILE_TSSARRAY_H_INCLUDED
 
 #include <cstddef>	 // For std::size_t
-#include <algorithm> // For std::copy, std::max, std::swap
+#include <algorithm> // For std::copy, std::max, std::rotate, std::swap
 
 // ****************************************************************************
 // class TSSArray - Class Definition
@@ -137,10 +137,19 @@ public:
 	// resize
 	void resize(size_type newsize)
 	{
-		if (_capacity <= newsize)
+		if (newsize > _capacity)
 		{
-			value_type * temp = new value_type[2 * newsize];
-			std::copy(begin(), end(), temp);
+			_capacity = std::max(2 * _capacity, newsize);
+			value_type * temp = new value_type[_capacity];
+			try
+			{
+				std::copy(begin(), end(), temp);
+			}
+			catch (...)
+			{
+				delete[] temp;
+				throw;
+			}
 			delete[] _data;
 			_data = temp;
 		}
@@ -151,13 +160,20 @@ public:
 	iterator insert(iterator pos,
 					const value_type & item)
 	{
-		return pos;
+		size_type index = pos - begin();
+		resize(_size + 1);
+		_data[_size - 1] = item;
+		iterator newpos = begin() + index;
+		std::rotate(newpos, begin() + _size - 1, end());
+		return newpos;
 	}
 
 	// erase
 	iterator erase(iterator pos)
 	{
-		return pos - 1;
+		std::rotate(pos, pos + 1, end());
+		resize(_size - 1);
+		return pos;
 	}
 
 	// begin - non-const & const
