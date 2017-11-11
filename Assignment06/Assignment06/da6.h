@@ -75,14 +75,23 @@ public:
 	// Returns an integer of an appropriate type giving the number of key-value pairs in the dataset.
 	std::size_t size() const
 	{
-		return 0;
+		size_t size = 0;
+		
+		std::shared_ptr<LLNode2<std::pair<key_type, data_type>>> search(_head);
+		while (search != nullptr)
+		{
+			++size;
+			search = search->_next;
+		}
+
+		return size;
 	}
 
 	// empty
 	// Returns a bool indicating whether there are no key-value pairs in the dataset.
 	bool empty() const
 	{
-		return false;
+		return (_head == nullptr);
 	}
 
 	// find
@@ -132,9 +141,10 @@ public:
 	void insert(key_type key, data_type value)
 	{
 		std::pair<key_type, data_type> item = std::make_pair(key, value);
-		LLNode2<std::pair<key_type, data_type>> node(item);
-		node._next = _head;
-		_head = std::make_shared<LLNode2<std::pair<key_type, data_type>>>(item);
+		LLNode2<std::pair<key_type, data_type>> node(item, _head);
+		static auto ptr=std::make_shared<LLNode2<std::pair<key_type, data_type>>>(node);
+		_head = ptr;
+			
 	}
 
 	// erase
@@ -142,7 +152,7 @@ public:
 	// Otherwise it does nothing.
 	void erase(key_type key)
 	{
-		return;
+		
 	}
 
 	// traverse
