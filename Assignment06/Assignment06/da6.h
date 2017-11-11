@@ -50,7 +50,7 @@ public:
 
 	// Default constructor
 	LLMap()
-		:_node(nullptr)
+		:_head(nullptr)
 	{}
 
 	// Copy constructor
@@ -97,8 +97,9 @@ public:
 		{
 			if (search->_data.first == key)
 			{
-				const data_type * result = search->_data.second;
-				return result;
+				std::shared_ptr<data_type> result = std::make_shared<data_type>(search->_data.second);
+				data_type * raw = result.get();
+				return raw;
 			}
 			search = search->_next;
 		}
@@ -114,8 +115,9 @@ public:
 		{
 			if (search->_data.first == key)
 			{
-				data_type * result = search->_data.second;
-				return result;
+				std::shared_ptr<data_type> result = std::make_shared<data_type>(search->_data.second);
+				data_type * raw = result.get();
+				return raw;
 			}
 
 			search = search->_next;
@@ -132,9 +134,7 @@ public:
 		std::pair<key_type, data_type> item = std::make_pair(key, value);
 		LLNode2<std::pair<key_type, data_type>> node(item);
 		node._next = _head;
-		_head = std::make_shared<LLNode2<std::pair<key_type, data_type>>> item;
-
-		return;
+		_head = std::make_shared<LLNode2<std::pair<key_type, data_type>>>(item);
 	}
 
 	// erase
