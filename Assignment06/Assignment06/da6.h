@@ -11,6 +11,7 @@
 #include <memory>		// For std::shared_ptr
 #include <cstddef>		// For std::size_t
 #include <utility>		// For std::pair
+#include <functional>	// For std::function
 
 #include "llnode2.h"	// Provided Linked List node
 
@@ -61,7 +62,14 @@ public:
 
 	// Destructor
 	~LLMap()
-	{}
+	{
+		while (_head)
+		{
+			auto temp = _head->_next;
+			_head.reset();
+			_head = temp;
+		}
+	}
 
 	// Copy assignment operator
 	LLMap & operator=(const LLMap & rhs) = delete;
@@ -77,8 +85,8 @@ public:
 	{
 		size_t size = 0;
 		
-		std::shared_ptr<LLNode2<std::pair<key_type, data_type>>> search(_head);
-		while (search != nullptr)
+		auto search = _head;
+		while (search)
 		{
 			++size;
 			search = search->_next;
@@ -91,7 +99,9 @@ public:
 	// Returns a bool indicating whether there are no key-value pairs in the dataset.
 	bool empty() const
 	{
-		return (_head == nullptr);
+		//return (_head == nullptr);
+
+		return isEmpty(_head);
 	}
 
 	// find
@@ -100,16 +110,13 @@ public:
 	// Otherwise, the returned pointer is nullptr.
 	const data_type * find(key_type key) const
 	{
-		std::shared_ptr<LLNode2<std::pair<key_type, data_type>>> search(_head);
+		auto search = _head;
 
-		while (search != nullptr)
+		while (search)
 		{
 			if (search->_data.first == key)
-			{
-				std::shared_ptr<data_type> result = std::make_shared<data_type>(search->_data.second);
-				data_type * raw = result.get();
-				return raw;
-			}
+				return &(search->_data.second);
+
 			search = search->_next;
 		}
 
@@ -118,16 +125,11 @@ public:
 
 	data_type * find(key_type key)
 	{
-		std::shared_ptr<LLNode2<std::pair<key_type, data_type>>> search(_head);
-
-		while (search != nullptr)
+		auto search = _head;
+		while (search)
 		{
 			if (search->_data.first == key)
-			{
-				std::shared_ptr<data_type> result = std::make_shared<data_type>(search->_data.second);
-				data_type * raw = result.get();
-				return raw;
-			}
+				return &(search->_data.second);
 
 			search = search->_next;
 		}
@@ -140,11 +142,7 @@ public:
 	// Replaces an existing key-value pair with that given.
 	void insert(key_type key, data_type value)
 	{
-		std::pair<key_type, data_type> item = std::make_pair(key, value);
-		LLNode2<std::pair<key_type, data_type>> node(item, _head);
-		static auto ptr=std::make_shared<LLNode2<std::pair<key_type, data_type>>>(node);
-		_head = ptr;
-			
+		push_front(_head, std::make_pair(key, value));
 	}
 
 	// erase
@@ -152,7 +150,25 @@ public:
 	// Otherwise it does nothing.
 	void erase(key_type key)
 	{
+		if (_head->_data.first == key)
+		{
+			_head = _head->_next;
+			return;
+		}
 		
+		auto prevItem = _head;
+		auto search = _head->_next;
+		while (search)
+		{
+			if (search->_data.first == key)
+			{
+				prevItem->_next = search->_next;
+				return;
+			}
+			
+			prevItem = search;
+			search = search->_next;
+		}
 	}
 
 	// traverse
@@ -160,10 +176,14 @@ public:
 	//		Two parameters: key and value
 	//		Returns nothing.
 	// Calls the passed function on each key-value pair in the dataset.
-	template <typename F>
-	void traverse(F func)
+	void traverse(std::function<void (key_type, data_type)> func)
 	{
-		return;
+		auto search = _head;
+		while (search)
+		{
+			func(search->_data.first, search->_data.second);
+			search = search->_next;
+		}
 	}
 
 // ***** LLMap: Data Members *****
