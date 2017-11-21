@@ -10,13 +10,7 @@
 #define FILE_TREESORT_H_INCLUDED
 
 #include <type_traits>	// for std::remove_reference
-#include <algorithm>
-using std::stable_sort;
-using std::copy;
-#include <vector>
-using std::vector;
 #include <iterator>
-using std::distance;
 #include <memory>		// for std::shared_ptr, std::make_shared
 
 
@@ -37,7 +31,7 @@ struct BSTreeNode {
 	std::shared_ptr<BSTreeNode<ValType>> _right;
 
 	// Parameterized Constructor
-	BSTreeNode(const ValType & data,
+	explicit BSTreeNode(const ValType & data,
 			   std::shared_ptr<BSTreeNode<ValType>> left = nullptr,
 			   std::shared_ptr<BSTreeNode<ValType>> right = nullptr)
 			   : _data(data)
@@ -48,6 +42,41 @@ struct BSTreeNode {
 	// Destructor
 	~BSTreeNode() = default;
 };
+
+// treeInsert
+template<typename ValType>
+void treeInsert(std::shared_ptr<BSTreeNode<ValType>> & node,
+				ValType data)
+{
+	if (node == nullptr)				// Empty Binary Search Tree
+	{
+		node = std::make_shared<BSTreeNode<ValType>>(data);
+		return;
+	}
+	
+	if (data < node->_data)				// Data less than node's _data
+	{
+		treeInsert(node->_left, data);
+		return;
+	}
+
+	else								// Data greater than or equal to node's data
+		treeInsert(node->_right, data);
+}
+
+// treeTraverse
+template<typename ValType, typename FDIter>
+void treeTraverse(std::shared_ptr<BSTreeNode<ValType>> & node,
+				  FDIter & iter)
+{
+	if (node == nullptr)
+		return;
+
+	treeTraverse(node->_left, iter);
+	*iter = node->_data;
+	iter++;
+	treeTraverse(node->_right, iter);
+}
 
 // treesort
 // Sort a given range using Treesort.
@@ -61,9 +90,16 @@ template<typename FDIter>
 void treesort(FDIter first, FDIter last)
 {
     // Get the type that FDIter points to
-    using Value = typename std::remove_reference<decltype(*first)>::type;
+    using ValType = typename std::remove_reference<decltype(*first)>::type;
+
+	// Create Binary Search Tree
+	std::shared_ptr<BSTreeNode<ValType>> head = nullptr;
+	for (FDIter item = first; item != last; ++item)
+		treeInsert(head, *item);
+
+	// Update range
+	treeTraverse(head, first);
 }
 
 
 #endif //#ifndef FILE_TREESORT_H_INCLUDED
-
