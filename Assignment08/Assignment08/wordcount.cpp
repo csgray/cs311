@@ -40,17 +40,20 @@ int main()
 
 	if (input.is_open())
 	{
-		cout << "Counting " << filename << "..." << endl;
-		
+		cout << "Counting " << filename << "..." << endl << endl;
+		map<string, int> counts;
+
 		string word;
 		while (input >> word)
-		{
-			cout << word << endl;
-		}
+			counts[word]++;
 		input.close();
+
+		cout << "Number of distinct words: " << counts.size() << endl << endl;
+		for (const auto & kvpair : counts)
+			cout << kvpair.first << " " << kvpair.second << endl;
 	}
 	
-	cout << "Press ENTER to quit.";
+	cout << endl << "Press ENTER to quit.";
 	while (cin.get() != '\n');
 
 	return 0;
