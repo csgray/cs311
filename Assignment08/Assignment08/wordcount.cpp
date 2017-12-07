@@ -37,7 +37,7 @@ int main()
 		cout << "Type your filename: ";
 		getline(cin, filename);
 		input.open(filename);
-		if (input.is_open())	// only exits the loop if the file was successfully opened
+		if (input.is_open())	// Only exits the loop if the file was successfully opened
 			break;
 		cout << "That cannot be opened. Please try again with another filename." << endl;
 	}
@@ -46,6 +46,11 @@ int main()
 	// Adds each word to the map as a key or increments its value if already present
 	while (input >> word)
 		counts[word]++;
+	if (!input.eof())			// Reports if stream was terminated unexpectedly due to a non-EOF error
+	{
+		cout << "ERROR: Stream terminated before end of file." << endl
+			 << "Resolve underlying issue and try again." << endl;
+	}
 	input.close();
 
 	// Outputs the results by printing the map's size then iterating over it
