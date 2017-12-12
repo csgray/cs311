@@ -17,8 +17,20 @@
 #include "catch.hpp"       // For the "Catch" unit-testing framework
 
 // Additional includes for this test program
-#include <limits>	// for std::numeric_limits
-#include <vector>	// for std::vector
+#include <limits>		// for std::numeric_limits
+#include <vector>		// for std::vector
+#include <algorithm>	// for std::sort
+#include <random>
+
+// Random Number Generator
+int randomNumber()
+{
+	std::random_device seed;
+	std::minstd_rand generator(seed());
+	std::uniform_int_distribution<int> values(std::numeric_limits<int>::min(), std::numeric_limits<int>::max());
+	return values(generator);
+}
+
 
 // *********************************************************************
 // Test Cases
@@ -91,19 +103,65 @@ TEST_CASE("SkipList Insertions",
 	SECTION("Insert 10 items.")
 	{
 		SkipList testList = SkipList();
-		std::vector<int> testInts;
-		testInts.push_back(0);
+		// Populate data
+		std::vector<int> testInts = {0, -37, 42, 178, 91, -9999, 777, 9999, 3, 400};
 		for (auto i : testInts)
-		testList.insert(0);
-		testList.insert(-37);
-		testList.insert(42);
-		testList.insert(178);
-		testList.insert(91);
-		testList.insert(-9999);
-		testList.insert(777);
-		testList.insert(9999);
-		testList.insert(3);
-		testList.insert(400);
-		//testList.print();
+			testList.insert(i);
+		std::sort(testInts.begin(), testInts.end());
+
+		std::vector<int> resultInts;
+		std::shared_ptr<SkipListNode> node = testList._head;
+		while (node->_down)
+			node = node->_down;
+		node = node->_right;
+		while (node->_value != testList._tail->_value)
+		{
+			resultInts.push_back(node->_value);
+			node = node->_right;
+		}
+		{
+			INFO("All items were inserted.");
+			REQUIRE(resultInts.size() == testInts.size());
+		}
+		{
+			INFO("Items are sorted.");
+			REQUIRE(resultInts == testInts);
+		}
+	}
+
+	SECTION("Insert 1000 items.")
+	{
+		SkipList testList = SkipList();
+		std::vector<int> testInts(1000);
+		std::vector<int> resultInts;
+		
+		// Generate 1000 random vectors across the entire range of possible ints
+		std::generate(testInts.begin(), testInts.end(), randomNumber);
+
+		// Populate skip list
+		for (auto i : testInts)
+			testList.insert(i);
+		
+		// Check for sorting
+		std::sort(testInts.begin(), testInts.end());
+		
+		// Retrieve results
+		std::shared_ptr<SkipListNode> node = testList._head;
+		while (node->_down)
+			node = node->_down;
+		node = node->_right;
+		while (node->_value != testList._tail->_value)
+		{
+			resultInts.push_back(node->_value);
+			node = node->_right;
+		}
+		{
+			INFO("All items were inserted.");
+			REQUIRE(resultInts.size() == testInts.size());
+		}
+		{
+			INFO("Items are sorted.");
+			REQUIRE(resultInts == testInts);
+		}
 	}
 }
