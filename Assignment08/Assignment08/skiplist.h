@@ -12,8 +12,10 @@
 #ifndef FILE_SKIPLIST_H_INCLUDED
 #define FILE_SKIPLIST_H_INCLUDED
 
-#include <memory> // for std::shared_ptr, std::make_shared
-#include <limits> // for std::numeric_limits
+#include <memory>	// for std::shared_ptr, std::make_shared
+#include <limits>	// for std::numeric_limits
+#include <random>	// for std::minstd_rand
+#include <iostream>		// for std::cout
 
 // struct SkipListNode
 // Skip List int node. SkipListNode objects should be created with std::make_shared and owned by a std::shared_ptr.
@@ -47,12 +49,12 @@ struct SkipListNode {
 	// Exceptions:
 	//		
 	// Strong Guarantee, Exception Neutral
-	explicit SkipListNode(int data,
+	explicit SkipListNode(int value,
 		std::shared_ptr<SkipListNode> up = nullptr,
 		std::shared_ptr<SkipListNode> down = nullptr,
 		std::shared_ptr<SkipListNode> left = nullptr,
 		std::shared_ptr<SkipListNode> right = nullptr)
-		: _value(data)
+		: _value(value)
 		, _up(up)
 		, _down(down)
 		, _left(left)
@@ -66,7 +68,7 @@ struct SkipListNode {
 // class SkipList
 // Uses a SkipList to hold a sorted dataset.
 // Invariants:
-//		_height >= 1;
+//		_height >= 2;
 //		_head is a shared_ptr to a SkipListNode of "negative infinity"
 //		_tail is a shared_ptr to a SkipListNode of "positive infinity"
 class SkipList {
@@ -89,38 +91,109 @@ public:
 		_head = std::make_shared<SkipListNode>(std::numeric_limits<int>::min()); 
 		_tail = std::make_shared<SkipListNode>(std::numeric_limits<int>::max(), nullptr, nullptr, _head, nullptr);
 		_head->_right = _tail;	// _head and _tail are linked
-
-		// increase _head and _tail by one level
-		_head = std::make_shared<SkipListNode>(_head->_value, nullptr, _head, nullptr, nullptr);
-		_tail = std::make_shared<SkipListNode>(_tail->_value, nullptr, _tail, _head, nullptr);
-		_head->_right = _tail;	// new _head and _tail are linked
-		_height++;
 	}
 
 	// Destructor
 	~SkipList() = default;
 
-// ***** Node Functions *****
-private:
-	// raiseLevel
-	// Adds a node above the passed node and links it to its neighbors at that level
-	void raiseLevel(std::shared_ptr<SkipListNode> node)
+// ***** Public Member Functions ****
+public:
+	// insert
+	// Adds the value to the skip list
+	void insert(int value)
 	{
-		// Find the closest node to the left at the new height
-		std::shared_ptr<SkipListNode> leftnode = node->_left;
-		while (!(leftnode->_up) && leftnode->_left)
-			leftnode = leftnode->_left;
-		if (leftnode->_up)
-			leftnode = leftnode->_up;
-		// Find the closest node to the right at the new height
-		std::shared_ptr<SkipListNode> rightnode = node->_right;
-		while (!(rightnode->_up) && rightnode->_left) 
-			rightnode = rightnode->_left;
-		if (rightnode->_up)
-			rightnode = rightnode->_up;
+		if (value == _head->_value || value == _tail->_value)
+			return;
+		std::shared_ptr<SkipListNode> leftnode = _head;
+		std::shared_ptr<SkipListNode> rightnode = _head->_right;
+		while (value > rightnode->_value || leftnode->_down)
+		{
+			while (value > rightnode->_value)	// Move right until value < rightnode->_value
+			{
+				leftnode = rightnode;
+				rightnode = leftnode->_right;
+			}
 
-		node->_up = std::make_shared<SkipListNode>(node->_value, nullptr, node, leftnode, rightnode);		
+			if (leftnode->_down)				// Move down if possible then try again
+				leftnode = leftnode->_down;
+		}
+		std::shared_ptr<SkipListNode> node = std::make_shared<SkipListNode>(value, nullptr, nullptr, leftnode, leftnode->_right);
+		leftnode->_right = node;
+		rightnode->_left = node;
+		
+		// Randomly add another level to the newly inserted value
+		//int coin = coinFlip();
+		//while (coin == 1)
+		//{
+		//	addUpNode(node);
+		//	node = node->_up;
+		//	coin = coinFlip();
+		//}
 	}
+
+	// print
+	// Prints each element in the list
+	void print()
+	{
+		std::shared_ptr<SkipListNode> node = _head;
+		while (node->_down)		// Reach bottom of the list
+			node=node->_down;
+		while (node)
+		{
+			std::cout << "Address: " << node << std::endl
+					  << "Value:   " << node->_value << std::endl
+					  << "Up:      " << node->_up << std::endl
+					  << "Down:    " << node->_down << std::endl
+					  << "Left:    " << node->_left << std::endl
+					  << "Right:   " << node->_right << std::endl << std::endl;
+			node = node->_right;
+		}
+	}
+
+// ***** Private Member Functions *****
+private:
+	// coinFlip
+	// Generates a random number between 0 and 1 to determine if we add a level
+	int coinFlip()
+	{
+		std::random_device seed;
+		std::minstd_rand generator(seed());
+		std::uniform_int_distribution<int> coin(0, 1);
+		int coinflip = coin(generator);
+		return coinflip;
+	}
+
+	// increaseHeight
+	// Adds a node above _
+	void increaseHeight()
+	{
+		_head->_up = std::make_shared<SkipListNode>(_head->_value, nullptr, _head, nullptr, nullptr);
+		_tail->_up = std::make_shared<SkipListNode>(_tail->_value, nullptr, _tail, _head->_up, nullptr);
+		_head = _head->_up;
+		_tail = _tail->_up;
+		_head->_right = _tail;
+		_height++;
+	}
+
+	// addUpNode
+	// Adds a node above the passed node and links it to its neighbors at that level
+	//void addUpNode(std::shared_ptr<SkipListNode> node)
+	//{
+		// Find the closest node to the left at the new height
+	//	std::shared_ptr<SkipListNode> leftnode = node->_left;
+	//	while ((leftnode->_up) && leftnode->_left)	// move further left until leftnode has an upnode
+	//		leftnode = leftnode->_left; 
+	//	leftnode = leftnode->_up;					// the new node's leftnode needs to be up a level
+	//	if (leftnode == _head)
+	//		increaseHeight();			
+		// Find the closest node to the right at the new height
+	//	std::shared_ptr<SkipListNode> rightnode = node->_right;
+	//	while (!(rightnode->_up) && rightnode->_right)
+	//		rightnode = rightnode->_right;
+	//	rightnode = rightnode->_up;
+
+	//	node->_up = std::make_shared<SkipListNode>(node->_value, nullptr, node, leftnode, rightnode);		
+	//}
 };
 
 #endif // #ifndef FILE_SKIPLIST_H_INCLUDED

@@ -47,8 +47,31 @@ TEST_CASE("SkipList Invariants",
 			REQUIRE(testList._tail->_left == testList._head);
 		}
 		{
-			INFO("List has height 2.");
-			REQUIRE(testList._height == 2);
+			INFO("List has height 1.");
+			REQUIRE(testList._height == 1);
 		}
+	}
+
+	SECTION("Insert one item.")
+	{
+		SkipList testList = SkipList();
+		testList.insert(0);
+		testList.print();
+	}
+
+	SECTION("Insert 10 items.")
+	{
+		SkipList testList = SkipList();
+		testList.insert(0);
+		testList.insert(-37);
+		testList.insert(42);
+		testList.insert(178);
+		testList.insert(91);
+		testList.insert(-9999);
+		testList.insert(777);
+		testList.insert(9999);
+		testList.insert(3);
+		testList.insert(400);
+		testList.print();
 	}
 }
