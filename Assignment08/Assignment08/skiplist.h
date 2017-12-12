@@ -3,11 +3,8 @@
 // 07 Dec 2017
 //
 // For CS 311 Fall 2017
-// Header for function template treesort
+// Header for class SkipList
 // There is no associated source file.
-//
-// I found this blog post especially helpful while writing this:
-// https://partiallattice.wordpress.com/2013/04/16/testing-c-skip-lists/
 
 #ifndef FILE_SKIPLIST_H_INCLUDED
 #define FILE_SKIPLIST_H_INCLUDED
@@ -98,6 +95,29 @@ public:
 
 // ***** Public Member Functions ****
 public:
+	// find
+	// Returns a const pointer to the bottom element containing the item
+	const std::shared_ptr<SkipListNode> find(int value)
+	{
+		std::shared_ptr<SkipListNode> node = _head;
+		while (true)
+		{
+			if (node->_value == value && !(node->_down))	// Bottom element with value
+				return node;
+			
+			if (node->_right->_value > value && !(node->_down))
+				break;
+
+			while (value >= node->_right->_value)			// Move right so long as value is larger than right value
+				node = node->_right;
+
+			if (node->_down)
+				node = node->_down;
+		}
+				
+		return nullptr;
+	}
+
 	// insert
 	// Adds the value to the skip list
 	void insert(int value)
@@ -106,9 +126,9 @@ public:
 			return;
 		std::shared_ptr<SkipListNode> leftnode = _head;
 		std::shared_ptr<SkipListNode> rightnode = _head->_right;
-		while (value > rightnode->_value || leftnode->_down)
+		while (value >= rightnode->_value || leftnode->_down)
 		{
-			while (value > rightnode->_value)	// Move right until value < rightnode->_value
+			while (value >= rightnode->_value)	// Move right until value < rightnode->_value
 			{
 				leftnode = rightnode;
 				rightnode = leftnode->_right;
@@ -138,7 +158,8 @@ public:
 		std::shared_ptr<SkipListNode> node = _head;
 		while (node->_down)		// Reach bottom of the list
 			node=node->_down;
-		while (node)
+		node = node->_right;	// Don't print _head;
+		while (node->_value != _tail->_value)
 		{
 			std::cout << "Address: " << node << std::endl
 					  << "Value:   " << node->_value << std::endl
